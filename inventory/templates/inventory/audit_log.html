@@ -1,0 +1,120 @@
+{% extends "inventory/base.html" %}
+{% block content %}
+
+<div class="card shadow">
+    <div class="card-body">
+
+        <h3 class="mb-4">
+            <i class="fa-solid fa-clock-rotate-left text-warning"></i>
+            System Activity Timeline
+        </h3>
+
+        <!-- FILTERS -->
+        <form method="get" class="row mb-4">
+            <div class="col-md-4">
+                <input type="text" name="q" value="{{ query }}"
+                       class="form-control" placeholder="Search activity...">
+            </div>
+
+            <div class="col-md-3">
+                <select name="action" class="form-select">
+                    <option value="">All Actions</option>
+                    <option value="CREATE" {% if selected_action == "CREATE" %}selected{% endif %}>Create</option>
+                    <option value="UPDATE" {% if selected_action == "UPDATE" %}selected{% endif %}>Update</option>
+                    <option value="DELETE" {% if selected_action == "DELETE" %}selected{% endif %}>Delete</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100">Filter</button>
+            </div>
+        </form>
+
+        <!-- TIMELINE -->
+        <div class="timeline">
+
+            {% for log in page_obj %}
+            <div class="timeline-item">
+
+                <!-- ICON -->
+                <div class="timeline-icon
+                    {% if log.action == 'CREATE' %}bg-success
+                    {% elif log.action == 'UPDATE' %}bg-warning
+                    {% elif log.action == 'DELETE' %}bg-danger
+                    {% else %}bg-secondary{% endif %}">
+                    
+                    {% if log.action == "CREATE" %}
+                        <i class="fa-solid fa-plus"></i>
+                    {% elif log.action == "UPDATE" %}
+                        <i class="fa-solid fa-pen"></i>
+                    {% elif log.action == "DELETE" %}
+                        <i class="fa-solid fa-trash"></i>
+                    {% else %}
+                        <i class="fa-solid fa-circle"></i>
+                    {% endif %}
+                </div>
+
+                <!-- CONTENT -->
+                <div class="timeline-content">
+
+                    <div class="d-flex justify-content-between">
+                        <strong>
+                            {{ log.user|default:"System" }}
+                        </strong>
+                        <small class="text-muted">
+                            {{ log.timestamp|date:"M d, Y H:i" }}
+                        </small>
+                    </div>
+
+                    <div class="mt-1">
+                        <span class="badge
+                            {% if log.action == 'CREATE' %}bg-success
+                            {% elif log.action == 'UPDATE' %}bg-warning text-dark
+                            {% elif log.action == 'DELETE' %}bg-danger
+                            {% else %}bg-secondary{% endif %}">
+                            {{ log.action }}
+                        </span>
+
+                        <span class="ms-2 text-muted">
+                            {{ log.model_name }}
+                        </span>
+                    </div>
+
+                    <p class="mt-2 mb-0">
+                        {{ log.description }}
+                    </p>
+
+                </div>
+            </div>
+
+            {% empty %}
+                <p class="text-muted text-center">No activity found</p>
+            {% endfor %}
+
+        </div>
+
+        <!-- PAGINATION -->
+        <div class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Prev</a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <span class="page-link">{{ page_obj.number }}</span>
+                </li>
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

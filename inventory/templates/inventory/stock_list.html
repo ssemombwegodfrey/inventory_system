@@ -1,0 +1,88 @@
+{% extends "inventory/base.html" %}
+{% block content %}
+
+<div class="card shadow">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h1 class="mb-0">Stock Items</h1>
+      <a href="{% url 'inventory:stock_move' %}" class="btn btn-primary">
+        Record Stock Movement
+      </a>
+    </div>
+
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Name</th>
+          <th>Quantity</th>
+          <th>Reorder Level</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+      {% for item in page_obj %}
+        <tr>
+          <td>{{ item.name }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>{{ item.reorder_level }}</td>
+          <td>
+            {% if item.quantity <= item.reorder_level %}
+              <span class="badge bg-danger">Low Stock</span>
+            {% else %}
+              <span class="badge bg-success">OK</span>
+            {% endif %}
+          </td>
+          <td>
+            <a class="btn btn-sm btn-outline-primary"
+               href="{% url 'inventory:stock_move' %}">
+              Move
+            </a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="5" class="text-center text-muted">
+            No stock items found
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <nav>
+      <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+          </li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}
+            <li class="page-item active">
+              <span class="page-link">{{ num }}</span>
+            </li>
+          {% else %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+          {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}

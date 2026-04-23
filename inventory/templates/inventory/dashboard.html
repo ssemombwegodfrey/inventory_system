@@ -1,0 +1,259 @@
+{% extends "inventory/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+
+  <!-- PAGE TITLE -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold">Dashboard</h3>
+    <span class="text-muted">Overview of system performance</span>
+  </div>
+
+  <!-- ===================== -->
+  <!-- TOP CARDS (UPGRADED) -->
+  <!-- ===================== -->
+  <div class="row g-3 mb-4">
+
+    <div class="col-md-3">
+      <div class="card dashboard-card border-0 shadow-sm">
+        <div class="card-body d-flex justify-content-between align-items-center">
+          <div>
+            <small class="text-muted">Total Assets</small>
+            <h3 class="fw-bold">{{ total_assets }}</h3>
+          </div>
+          <div class="icon-circle bg-primary">
+            <i class="fas fa-box text-white"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card dashboard-card border-0 shadow-sm">
+        <div class="card-body d-flex justify-content-between align-items-center">
+          <div>
+            <small class="text-muted">Assigned</small>
+            <h3 class="fw-bold">{{ assigned }}</h3>
+          </div>
+          <div class="icon-circle bg-success">
+            <i class="fas fa-user-check text-white"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card dashboard-card border-0 shadow-sm">
+        <div class="card-body d-flex justify-content-between align-items-center">
+          <div>
+            <small class="text-muted">In Stock</small>
+            <h3 class="fw-bold">{{ in_stock }}</h3>
+          </div>
+          <div class="icon-circle bg-warning">
+            <i class="fas fa-warehouse text-white"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card dashboard-card border-0 shadow-sm">
+        <div class="card-body d-flex justify-content-between align-items-center">
+          <div>
+            <small class="text-muted">Disposed</small>
+            <h3 class="fw-bold">{{ disposed }}</h3>
+          </div>
+          <div class="icon-circle bg-danger">
+            <i class="fas fa-trash text-white"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===================== -->
+  <!-- CHARTS -->
+  <!-- ===================== -->
+  <div class="row g-3">
+
+    <div class="col-md-6">
+      <div class="card shadow-sm border-0">
+        <div class="card-header fw-semibold">
+          Asset Status
+        </div>
+        <div class="card-body">
+          <canvas id="assetStatusChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card shadow-sm border-0">
+        <div class="card-header fw-semibold">
+          Maintenance Cost Trend
+        </div>
+        <div class="card-body">
+          <canvas id="maintenanceCostChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- STOCK CHART -->
+  <div class="row mt-3">
+    <div class="col-md-12">
+      <div class="card shadow-sm border-0">
+        <div class="card-header fw-semibold">
+          Stock Level Overview
+        </div>
+        <div class="card-body">
+          <canvas id="stockLevelChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== -->
+  <!-- ALERTS + ACTIVITY -->
+  <!-- ===================== -->
+  <div class="row mt-4 g-3">
+
+    <!-- LOW STOCK -->
+    <div class="col-md-6">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-danger text-white fw-semibold">
+          ⚠ Low Stock Alerts
+        </div>
+
+        <div class="card-body">
+
+          {% if low_stock %}
+          <table class="table table-sm align-middle">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Reorder</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in low_stock %}
+              <tr>
+                <td>{{ item.name }}</td>
+                <td class="fw-bold text-danger">{{ item.quantity }}</td>
+                <td>{{ item.reorder_level }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+            <div class="text-success">
+              <i class="fa-solid fa-circle-check"></i> All stock levels are good
+            </div>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+
+    <!-- RECENT ACTIVITY -->
+    <div class="col-md-6">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-dark text-white fw-semibold">
+          📋 Recent Stock Movements
+        </div>
+
+        <div class="card-body">
+
+          <table class="table table-sm align-middle">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Type</th>
+                <th>Qty</th>
+                <th>User</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for move in recent_movements %}
+              <tr>
+                <td>{{ move.stock_item.name }}</td>
+
+                <td>
+                  {% if move.movement_type == "IN" %}
+                    <span class="badge bg-success">IN</span>
+                  {% else %}
+                    <span class="badge bg-danger">OUT</span>
+                  {% endif %}
+                </td>
+
+                <td>{{ move.qty }}</td>
+                <td>{{ move.done_by.username }}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="4" class="text-muted text-center">
+                  No recent movements
+                </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ===================== -->
+<!-- CHARTS -->
+<!-- ===================== -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+
+new Chart(document.getElementById('assetStatusChart'), {
+  type: 'doughnut',
+  data: {
+    labels: {{ asset_status_chart.labels|safe }},
+    datasets: [{
+      data: {{ asset_status_chart.data|safe }},
+      backgroundColor: ['#22c55e','#3b82f6','#facc15','#ef4444'],
+    }]
+  }
+});
+
+new Chart(document.getElementById('maintenanceCostChart'), {
+  type: 'line',
+  data: {
+    labels: {{ maintenance_cost_chart.labels|safe }},
+    datasets: [{
+      label: 'Cost',
+      data: {{ maintenance_cost_chart.data|safe }},
+      borderColor: '#ef4444',
+      tension: 0.4
+    }]
+  }
+});
+
+new Chart(document.getElementById('stockLevelChart'), {
+  type: 'bar',
+  data: {
+    labels: {{ stock_chart.labels|safe }},
+    datasets: [{
+      label: 'Quantity',
+      data: {{ stock_chart.data|safe }},
+      backgroundColor: '#3b82f6'
+    }]
+  },
+  options: { indexAxis: 'y' }
+});
+
+</script>
+
+{% endblock %}

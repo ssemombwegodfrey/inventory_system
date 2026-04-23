@@ -1,0 +1,17 @@
+{% extends "inventory/base.html" %}
+
+{% block content %}
+<div class="card shadow">
+  <div class="card-body">
+    <h2 class="card-title mb-4">Confirm Delete</h2>
+
+    <p>Are you sure you want to delete asset: <strong>{{ asset.tag }} - {{ asset.name }}</strong> ?</p>
+
+    <form method="post">
+      {% csrf_token %}
+      <button class="btn btn-danger" type="submit">Yes, Delete</button>
+      <a href="{% url 'inventory:asset_detail' asset.pk %}" class="btn btn-secondary">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

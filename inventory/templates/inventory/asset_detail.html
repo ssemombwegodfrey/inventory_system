@@ -1,0 +1,134 @@
+{% extends "inventory/base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+  <div class="row">
+
+    <!-- LEFT SIDE (ASSET DETAILS) -->
+    <div class="col-md-8">
+      <div class="card shadow mb-4">
+        <div class="card-body">
+          <h2 class="card-title mb-4">Asset Details</h2>
+
+          <table class="table table-bordered">
+            <tr><th>Tag</th><td>{{ asset.tag }}</td></tr>
+            <tr><th>Name</th><td>{{ asset.name }}</td></tr>
+            <tr><th>Category</th><td>{{ asset.category }}</td></tr>
+            <tr><th>Location</th><td>{{ asset.location }}</td></tr>
+            <tr><th>Status</th><td>{{ asset.get_status_display }}</td></tr>
+            <tr><th>Purchase Date</th><td>{{ asset.purchase_date }}</td></tr>
+            <tr><th>Value</th><td>{{ asset.value }}</td></tr>
+            <tr><th>Description</th><td>{{ asset.description }}</td></tr>
+          </table>
+
+          <a href="{% url 'inventory:asset_edit' asset.pk %}" class="btn btn-primary">Edit</a>
+          <a href="{% url 'inventory:asset_delete' asset.pk %}" class="btn btn-danger">Delete</a>
+          <a href="{% url 'inventory:asset_list' %}" class="btn btn-secondary">Back</a>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDE (QR CODE) -->
+    <div class="col-md-4">
+      <div class="card shadow mb-4">
+        <div class="card-header bg-info text-white">
+          Asset QR Code
+        </div>
+        <div class="card-body text-center">
+          {% if asset.qr_code_base64 %}
+          <img src="{{ asset.qr_code_base64 }}" 
+               alt="QR Code for {{ asset.tag }}" 
+               class="img-fluid mb-2"
+               style="max-width:200px;">
+          <p><small>Scan to view this asset</small></p>
+          {% else %}
+          <p class="text-danger">QR code not available</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ASSIGNMENT HISTORY -->
+  <div class="card shadow mb-4">
+    <div class="card-header bg-primary text-white">
+      Assignment History
+    </div>
+    <div class="card-body">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Department</th>
+            <th>Assigned On</th>
+            <th>Returned On</th>
+            <th>Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in assignments %}
+          <tr>
+            <td>{{ a.assigned_to }}</td>
+            <td>{{ a.department }}</td>
+            <td>{{ a.assigned_on }}</td>
+            <td>
+              {% if a.returned_on %}
+                {{ a.returned_on }}
+              {% else %}
+                <span class="text-danger">Not Returned</span>
+              {% endif %}
+            </td>
+            <td>{{ a.note }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5">No assignment history</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MAINTENANCE HISTORY -->
+  <div class="card shadow">
+    <div class="card-header bg-warning">
+      Maintenance History
+    </div>
+    <div class="card-body">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Performed By</th>
+            <th>Cost</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in maintenance_records %}
+          <tr>
+            <td>{{ m.performed_on }}</td>
+            <td>{{ m.title }}</td>
+            <td>{{ m.description }}</td>
+            <td>{{ m.performed_by }}</td>
+            <td>{{ m.cost }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5">No maintenance history</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
