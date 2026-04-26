@@ -2,23 +2,28 @@
 Django settings for inventory_system project.
 """
 
+import os
 from pathlib import Path
 
+# =========================
+# BASE DIR
+# =========================
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # =========================
 # SECURITY
 # =========================
-SECRET_KEY = os.environ.get('SECRET_KEY')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key-for-local-only')
 
-DEBUG = False
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
     ".onrender.com"
 ]
+
 
 # =========================
 # APPLICATIONS
@@ -42,19 +47,16 @@ INSTALLED_APPS = [
 
 
 # =========================
-# MIDDLEWARE (FIXED)
+# MIDDLEWARE
 # =========================
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-
-    # WhiteNoise for static files (production-ready)
     'whitenoise.middleware.WhiteNoiseMiddleware',
 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
 
     'django.middleware.csrf.CsrfViewMiddleware',
-
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
 
@@ -124,7 +126,6 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# WhiteNoise compression
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
